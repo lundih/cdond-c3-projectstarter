@@ -41,6 +41,10 @@ jobs:
       - restore_cache:
           keys: [frontend-build]
       - run:
+          name: Navigate to frontend directory
+          command: |
+            cd frontend/
+      - run:
           name: Install dependencies
           command: |
             npm i
@@ -59,6 +63,10 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+       - run:
+          name: Navigate to frontend directory
+          command: |
+            cd backend/
       - run:
           name: Install dependencies
           command: |
