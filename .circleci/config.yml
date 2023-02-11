@@ -44,6 +44,7 @@ jobs:
           name: Navigate to frontend directory
           command: |
             cd frontend/
+            pwd
       - run:
           name: Install dependencies
           command: |
