@@ -37,13 +37,13 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      - restore_cache:
-          keys: [frontend-build]
-      - checkout
       - run:
           name: Navigate to frontend directory
           command: |
             cd frontend/
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
@@ -60,9 +60,9 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
+      - checkout
       - restore_cache:
           keys: [backend-build]
-      - checkout
       - run:
           name: Navigate to backend directory
           command: |
