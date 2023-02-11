@@ -63,8 +63,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-       - run:
-          name: Navigate to frontend directory
+      - run:
+          name: Navigate to backend directory
           command: |
             cd backend/
       - run:
