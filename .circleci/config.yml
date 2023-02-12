@@ -165,7 +165,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/base:2023.02
+      - image: cimg/aws:2023.01
     steps:
       - checkout 
       - add_ssh_keys:
@@ -179,9 +179,6 @@ jobs:
             sudo apt install software-properties-common -y
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
       - run:
           name: Configure server
           command: |
@@ -198,11 +195,9 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm cache clean --force
-            sudo rm -rf node_modules
-            sudo rm -f package-lock.json
             npm install
             npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
       - run:
           name: Send migration results to KVDB
           command: |
