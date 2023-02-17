@@ -252,7 +252,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo add-apt-repository --yes ppa:ansible/ansible
+            sudo add-apt-repository ppa:ansible/ansible
             sudo apt update
             sudo apt install ansible -y
       - run:
