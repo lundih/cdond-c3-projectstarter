@@ -242,7 +242,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:19.6.0
     steps:
       - checkout
       - add_ssh_keys:
@@ -252,13 +252,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo apt update -y
-            sudo apt upgrade -y
-            sudo apt-get install software-properties-common -y
-            sudo apt-add-repository --yes ppa:ansible/ansible
-            sudo apt-get update -y
-            sudo apt-get install ansible -y
-            sudo ansible --version
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
       - run:
           name: Deploy backend
           command: |
