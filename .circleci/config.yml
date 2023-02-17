@@ -252,9 +252,12 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            sudo add-apt-repository ppa:ansible/ansible
-            sudo apt update
-            sudo apt install ansible -y
+            sudo apt update -y
+            sudo apt upgrade -y
+            sudo apt-add-repository ppa:ansible/ansible
+            sudo apt-get update -y
+            sudo apt-get install ansible -y
+            sudo ansible --version
       - run:
           name: Deploy backend
           command: |
