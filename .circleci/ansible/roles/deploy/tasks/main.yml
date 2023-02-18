@@ -11,6 +11,7 @@
     dest: ~/backend
 
 - name: "Start app"
+  become: yes
   shell: |
     cd ~/backend
     npm i
