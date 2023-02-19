@@ -338,6 +338,14 @@ jobs:
               --stack-name InitialStack \
               --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
               --tags project=udapeople
+      - run:
+          name: Save current workflow ID to kvdb.io for next clean up job
+          command: |
+            export CURRENT_WORKFLOW_ID=$(aws cloudformation \
+                      list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                      --no-paginate --output text)
+            echo "Current Workflow ID: $CURRENT_WORKFLOW_ID"
+            curl -k https://kvdb.io/${KVDB_BUCKET}/workflow_id -d "${CURRENT_WORKFLOW_ID}"
       - destroy-environment
       - revert-migrations
 
@@ -349,9 +357,7 @@ jobs:
       - run:
           name: Get old stack workflow id
           command: |
-            export OldWorkflowID=$(aws cloudformation \
-              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-              --no-paginate --output text)
+            export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/workflow_id)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
