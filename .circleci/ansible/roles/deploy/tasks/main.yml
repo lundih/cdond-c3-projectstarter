@@ -1,20 +1,35 @@
 ---
+  - name: "Create backend directory"
+    file:
+      path: ~/backend
+      state: directory
 
-- name: "Create backend directory"
-  file:
-    path: ~/backend
-    state: directory
+  - name: "Update"
+    become: yes
+    apt:
+      update_cache: yes
+      cache_valid_time: 86400
+  
+  - name: "Delete unneeded dependencies"
+    become: yes
+    apt:
+      autoremove: yes
 
-- name: "Unarchive files"
-  unarchive:
-    src: artifact.tar.gz
-    dest: ~/backend
+  - name: "Upgrade packages"
+    become: yes
+    apt: 
+      upgrade: yes
 
-- name: "Start app"
-  become: yes
-  shell: |
-    cd ~/backend
-    npm i
-    pm2 stop default
-    pm2 start npm -- start
+  - name: "Unarchive files"
+    unarchive:
+      src: artifact.tar.gz
+      dest: ~/backend
+
+  - name: "Start app"
+    become: yes
+    shell: |
+      cd ~/backend
+      npm install
+      pm2 stop default
+      pm2 start npm -- start
 
