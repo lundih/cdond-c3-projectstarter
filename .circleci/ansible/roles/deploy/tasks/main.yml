@@ -24,9 +24,6 @@
     become: yes
     shell: |
       npm install
-      npm audit fix --force --audit-level=critical
-      npm audit fix --force --audit-level=critical
-      npm audit --audit-level=critical
       pm2 stop default
       pm2 start npm -- start
 
