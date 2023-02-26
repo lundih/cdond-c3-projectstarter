@@ -15,9 +15,9 @@
       state: latest
       update_cache: yes
 
- - name: "install pm2"
-   become: yes
-   npm:
+  - name: "install pm2"
+    become: yes
+    npm:
       name: pm2
       global: yes
       production: yes
