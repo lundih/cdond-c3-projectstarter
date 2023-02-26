@@ -111,8 +111,6 @@ jobs:
           command: |
             cd frontend/
             npm install
-            npm audit fix --force --audit-level=critical
-            npm audit fix --force --audit-level=critical
             npm audit --audit-level=critical
 
   scan-backend:
@@ -169,27 +167,25 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/aws:2023.01
+      - image: python:3.10-alpine3.16 
     steps:
-      - checkout 
-      - add_ssh_keys:
+      - checkout
+      - add_ssh_keys: 
           fingerprints: ["61:51:fa:58:7e:50:c6:28:ed:ce:fe:d3:57:47:e3:48"]
       - attach_workspace:
           at: ~/
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
+            apk add --update --no-cache ansible tar gzip aws-cli openssh
       - run:
           name: Configure server
           command: |
             cd ~/project/.circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     docker:
@@ -250,48 +246,36 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: cimg/node:19.6.0
+      - image: python:3.8-alpine3.15
     steps:
       - checkout
-      - add_ssh_keys:
+      - add_ssh_keys: 
           fingerprints: ["61:51:fa:58:7e:50:c6:28:ed:ce:fe:d3:57:47:e3:48"]
       - attach_workspace:
           at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install ansible -y
+            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
       - run:
-          name: Deploy backend
+          name: Package Backend
           command: |
             cd backend
-            # Create env file
-            touch .env
-            echo ENVIRONMENT=production > ".env"
-            echo NODE_ENV=production >> ".env"
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> ".env"
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> ".env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> ".env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> ".env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> ".env"
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> ".env"
-
             npm i
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
-            mkdir ~/project/.circleci/ansible/roles/deploy/files
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv build-artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
+      - run:
+          name: Deploy backend
+          command: |
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
+            ansible-playbook -i inventory.txt deploy-backend.yml 
       - destroy-environment
       - revert-migrations
 
@@ -326,8 +310,8 @@ jobs:
             else
               exit 1
             fi
-      # - destroy-environment
-      # - revert-migrations
+      - destroy-environment
+      - revert-migrations
 
   cloudfront-update:
     docker:
